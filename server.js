@@ -1,10 +1,13 @@
+require("dotenv").config();
+const path = require("path");
+
 const express = require("express")
 const http = require("http")
 const app = express()
 const server = http.createServer(app)
 const io = require("socket.io")(server, {
 	cors: {
-		origin: "https://radiant-journey-39269.herokuapp.com/",
+		origin: "http://localhost:3000",
 		methods: [ "GET", "POST" ]
 	}
 })
@@ -31,4 +34,18 @@ io.on("connection", (socket) => {
 	})
 })
 
-server.listen(process.env.PORT|| 5000, () => console.log("server is running on port 5000"))
+
+// Deployment changes
+
+if(process.env.PROD) {
+	app.use(express.static(path.join(__dirname, './teamsclone/build')));
+	app.get('*', (req,res) => {
+		res.sendFile(path.join(__dirname, './teamsclone/build/index.html'));
+	});
+}
+
+
+const port = process.env.PORT || 5000;
+
+
+server.listen(port, () => console.log('server is running on port ${port}'));
